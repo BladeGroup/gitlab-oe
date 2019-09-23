@@ -51,15 +51,21 @@ patches welcomed.
   must first push the `$BRANCHPREFIX_ARCH/$BASEBRANCHNAME` first
 - lots of `siginfo` files in the shared-state get just their timestamp
   modified, resulting in much more rsync work than really needed
+- usage through a submodule hits a limitation of current gitlab, where
+  we must refer to the same submodule sha1 in the `gitlab-ci.yml`'s
+  `include:file` statement
 
 planned evolutions:
 
 - support docker-based runners
+- get gitlab-ci to support submodules natively
+- add a safety net to avoid sha1 discrepancy between `/ci` and
+  `/.gitlab-ci.yml`
 
 == example use
 
   include:
-    - local: "/ci/oe.yml"
+    - remote: "https://raw.githubusercontent.com/BladeGroup/gitlab-oe/161fd388350fb263a35f1ec598d1911ab3926035/oe.yml"
   
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
