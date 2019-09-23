@@ -1,0 +1,28 @@
+#!/bin/bash
+set -e
+
+B=""
+while [ $# -gt 1 ]; do
+    case "$1" in
+        --dir)
+            B="$2"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            die "unknown flag '$1'"
+            ;;
+        *)
+            break
+            ;;
+    esac
+    shift
+done
+
+[ -d "$B" ] || die "directory '$B' does not exist"
+
+. poky/oe-init-build-env "$B"
+"$@"

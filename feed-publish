@@ -1,0 +1,59 @@
+#!/bin/sh
+set -e
+
+B=""
+ARCH=""
+DST=""
+PORT=""
+FEED=""
+PKGTYPE="ipk"
+while [ $# -gt 1 ]; do
+    case "$1" in
+        --dir)
+            B="$2"
+            shift
+            ;;
+        --arch)
+            ARCH="$2"
+            shift
+            ;;
+        --rsync-to)
+            DST="$2"
+            shift
+            ;;
+        --ssh-port)
+            PORT="$2"
+            shift
+            ;;
+        --feed)
+            FEED="$2"
+            shift
+            ;;
+        --pkg-type)
+            PKGTYPE="$2"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            die "unknown flag '$1'"
+            ;;
+        *)
+            break
+            ;;
+    esac
+    shift
+done
+
+[ -d "$B" ] || die "directory '$B' does not exist"
+[ -n "$ARCH" ] || die "missing --arch"
+[ -n "$DST" ] || die "missing --rsync-to"
+[ -n "$FEED" ] || die "missing --feed"
+
+if [ -n "$PORT" ]; then
+    export RSYNC_RSH="ssh -p '$PORT'"
+fi
+
+rsync -av --delete-after "${B}/tmp/deploy/${PKGTYPE}/" "${DST}/${ARCH}/${FEED}"

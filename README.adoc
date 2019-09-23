@@ -1,0 +1,123 @@
+= gitlab-ci helper scripts for OpenEmbedded builds
+
+This project contains gitlab-ci config snippets and associated script
+to help in building an OpenEmbedded-based project.
+
+This includes:
+
+- support for building for several platforms
+- support for building images or SDK
+- publication of package feeds
+- publication of shared-state for reuse by developpers
+- offload of build artifacts through rsync servers, as gitlab does not
+  support large-enough artifacts
+- support for platform-specific branches using a branch prefix
+  (eg. `board1/master`)
+- persistence of downloads and shared-state directories
+- different downloads directories between major poky versions
+- different shared-state directories when you decide it (typically on
+  toolchain change)
+- copy-on-write shared-state for use in dev branches to limit cache
+  polution and inflation (eg. `BUILD_GEN: 1.2+mytest`)
+- (non-optional) usage of buildhistory repo and PR server
+- buildhistory stored in seprate branches for each platform and each
+  source branch
+- archiving of interesting task logs as build artifacts (filtering out
+  setscene and rm_work)
+
+== assumptions on project setup
+
+- hosted by gitlab 12.0 or higher (for multiple `extends`)
+- this repository is included in your project repo as `/ci` (eg. using
+  git submodule or subtree)
+- yocto project's Poky repository is available in your project repo as
+  `/poky`
+- all other layers are available after checkout
+- `$BUILDHISTREPO` must be writable from your gitlab-ci user
+- you have set up a PR server, accessible from your runner (which
+  assumes both are located inside of a trusted network)
+
+This has been only used with a submodule-based setup, other setups may
+work too (eg. using git subtrees or Android's `repo`), examples and
+patches welcomed.
+
+== current limitations
+
+- assumes a single shell runner containing all tools required to build
+  your project
+- the shared-state and download dirs are kept in the runner
+- to have the CI build for a given target plaform from a given branch
+  of your source repository where it was never CI-built before, you
+  must first push the `$BRANCHPREFIX_ARCH/$BASEBRANCHNAME` first
+- lots of `siginfo` files in the shared-state get just their timestamp
+  modified, resulting in much more rsync work than really needed
+
+planned evolutions:
+
+- support docker-based runners
+
+== example use
+
+  include:
+    - local: "/ci/oe.yml"
+  
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    BUILD_GEN: "1.2"
+    POKY_BASE: "warrior"
+    B: "build"
+    BUILDHISTREPO: "ssh://git@git.company.net/oe/buildhistory.git"
+    PRSERV: "prserv.company.net:8585"
+  
+  .template_variables_board1: &variables_board1
+    YOCTO_ARCH: "x86_64"
+    UPDATE_ARCH: "board1"
+    BRANCHPREFIX_ARCH: "board1"
+  
+  .board1_exceptions:
+    except:
+      - /^board2\/.*$/
+  
+  cache:
+    paths:
+    - $B/cache
+  
+  stages:
+    - build
+  
+  .my_oe_setup:
+    extends: .oe_setup
+    tags:
+      - oe
+    when: manual
+    only:
+      - branches
+  
+  board1-image:
+    variables:
+      <<: *variables_board1
+    extends:
+      - .my_oe_setup
+      - .oe_deploy
+      - .oe_buildlogs_artifacts
+      - .board1_exceptions
+    allow_failure: false
+    stage: build
+    script:
+      - ./ci/run-bitbake --dir "${B}" -- -k core-image-x11 my-packagegroup
+  # save/deploy artifacts
+      - ./ci-my-images-deploy ...
+      - git -C "$B/buildhistory" push origin HEAD
+  
+  board1-sdk:
+    variables:
+      <<: *variables_board1
+      IMGROOT: core-image-x11
+    extends:
+      - .my_oe_setup
+      - .oe_buildlogs_artifacts
+      - .board1_exceptions
+    stage: afterbuild
+    script:
+      - ./ci/run-bitbake --dir ${B} -- ${IMGROOT} -c populate_sdk
+      - tar -C $B/tmp/deploy/sdk/ -cvf - . --xform=s,^.,${YOCTO_ARCH}/${BASEBRANCHNAME}, | ssh -p ${SSH_SDK_PORT} ${SSH_SDK_SRV} tar -C ${SSH_SDK_DIR} -xf -

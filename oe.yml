@@ -1,0 +1,31 @@
+# needs project-level variables
+# - RSYNC_REPO_SRV: rsync url to publish package feeds
+# - RSYNC_REPO_PORT (optional): ssh port to join rsync server for package feeds
+# - RSYNC_SSTATE_SRV: rsync url to publish shared-state cache
+# - RSYNC_SSTATE_PORT (optional): ssh port to join rsync server for  shared-state cache
+# needs global variables:
+# - POKY_BASE: poky version nickname for separate download dirs
+# - B: oe build directory
+# - BUILD_GEN: generation for separate shared-states
+# - BUILDHISTREPO: git buildhistory repository
+# - PRSERV: suitable value for PRSERV_HOST in local.conf
+# needs platform variables:
+# - BRANCHPREFIX_ARCH: for conf template directory and buildhistory branch prefix
+# - UPDATE_ARCH: used to separate feeds for different architectures
+
+.oe_setup:
+  before_script:
+    - BASEBRANCHNAME="${CI_COMMIT_REF_NAME#${BRANCHPREFIX_ARCH}/}"
+    - ./ci/mkconf --dir "${B}" --sstate-gen "${BUILD_GEN}" --download-dir "${HOME}/downloads-${POKY_BASE}" --template-conf "$PWD/conf-${BRANCHPREFIX_ARCH}" --buildhistory-repo "$BUILDHISTREPO" --buildhistory-ref "${BRANCHPREFIX_ARCH}/$BASEBRANCHNAME" --prserv "$PRSERV"
+
+.oe_deploy:
+  after_script:
+    - ./ci/feed-publish --dir "${B}" --arch "${UPDATE_ARCH}" --feed "$BASEBRANCHNAME" --rsync-to "${RSYNC_REPO_SRV}" --ssh-port "${RSYNC_REPO_PORT}"
+    - ./ci/sstate-publish --dir "${B}" --sstate-gen "${BUILD_GEN}" --rsync-to "${RSYNC_SSTATE_SRV}" --ssh-port "${RSYNC_SSTATE_PORT}"
+
+.oe_buildlogs_artifacts:
+  artifacts:
+    name: "oe-logs-${UPDATE_ARCH}-${CI_JOB_ID}"
+    when: always
+    paths:
+      - "oelogs/*/*/*"

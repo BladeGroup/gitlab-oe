@@ -1,0 +1,117 @@
+#!/bin/bash
+set -e
+
+die() {
+    echo >&2 "ERROR: $*"
+    exit 1
+}
+
+B=""
+TEMPLATECONF=""
+GEN=""
+DL_DIR=""
+HISTREPO=""
+HISTREF=""
+PRSERV=""
+while [ $# -gt 1 ]; do
+    case "$1" in
+        --dir)
+            B="$2"
+            shift
+            ;;
+        --template-conf)
+            TEMPLATECONF="$2"
+            shift
+            ;;
+        --sstate-gen)
+            GEN="$2"
+            shift
+            ;;
+        --download-dir)
+            DL_DIR="$2"
+            shift
+            ;;
+        --buildhistory-repo)
+            HISTREPO="$2"
+            shift
+            ;;
+        --buildhistory-ref)
+            HISTREF="$2"
+            shift
+            ;;
+        --prserv)
+            PRSERV="$2"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            die "unknown flag '$1'"
+            ;;
+        *)
+            break
+            ;;
+    esac
+    shift
+done
+
+[ -n "$B" ] || die "missing --dir"
+[ -n "$TEMPLATECONF" ] || die "missing --template-conf"
+[ -n "$GEN" ] || die "missing --sstate-gen"
+[ -n "$DL_DIR" ] || die "missing --download-dir"
+[ -n "$HISTREPO" ] || die "missing --buildhistory-repo"
+[ -n "$HISTREF" ] || die "missing --buildhistory-ref"
+[ -n "$PRSERV" ] || die "missing --prserv"
+
+
+SSTATE="${HOME}/sstate-cache-$GEN"
+
+case "$GEN" in
+    *+*)
+        BASEGEN=${GEN%+*}
+        BASESSTATE="${HOME}/sstate-cache-$BASEGEN"
+        if [ ! -e "${SSTATE}" ]; then
+            [ -e "${BASESSTATE}" ] || die "Could not find base sstate '${BASESSTATE}'"
+            cp -al "${BASESSTATE}" "${SSTATE}"
+        fi
+    ;;
+esac
+
+if [ -r "$B"/conf/local.conf ]; then
+    . poky/oe-init-build-env "$B"
+
+else
+    TEMPLATECONF="$TEMPLATECONF" . poky/oe-init-build-env "$B"
+
+    # make sure the branch is current so shadow-image identifies
+    # BRANCHNAME (unless CI_COMMIT_REF_NAME does not match the sha -
+    # maybe for rebuilds of older versions ?  Or should we just "git
+    # branch -f" all the time ?)
+    UPSTREAMSHA=$(git rev-parse "origin/${CI_COMMIT_REF_NAME}")
+    if [ "$UPSTREAMSHA" = "${CI_COMMIT_SHA}" ]; then
+        git branch -f "${CI_COMMIT_REF_NAME}" "origin/${CI_COMMIT_REF_NAME}"
+        git checkout "${CI_COMMIT_REF_NAME}"
+        # assert we did not change sha1
+        test $(git rev-parse HEAD) = ${CI_COMMIT_SHA}
+    fi
+
+    git clone "$HISTREPO" buildhistory
+
+    # adjust conf
+    cat >> "conf/local.conf" <<EOF
+
+DL_DIR = "${DL_DIR}"
+SSTATE_DIR = "${SSTATE}"
+RM_WORK_EXCLUDE = ""
+
+INHERIT += "buildhistory"
+BUILDHISTORY_COMMIT = "1"
+BUILDHISTORY_FEATURES = "image"
+EOF
+
+    sed -i 's/^PRSERV_HOST = .*/PRSERV_HOST = "'"$PRSERV"'"/' "conf/local.conf"
+fi
+
+git -C buildhistory checkout "$HISTREF"

@@ -1,0 +1,38 @@
+#!/bin/sh
+set -e
+
+B=""
+while [ $# -gt 1 ]; do
+    case "$1" in
+        --dir)
+            B="$2"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            die "unknown flag '$1'"
+            ;;
+        *)
+            break
+            ;;
+    esac
+    shift
+done
+
+[ -d "$B" ] || die "directory '$B' does not exist"
+
+./ci/run --dir "$B" bitbake "$@"
+
+mkdir -p oelogs
+find build \
+     -path 'build/tmp/work/*/*/*/temp/log.*.*' \
+     -not -name '*_setscene.*' \
+     -not -name '*.do_rm_work*' |
+    sed s,^build/tmp/work/,, |
+    while IFS=/ read arch pkg v _temp file; do
+        mkdir -p oelogs/$arch/${pkg}_$v
+        ln build/tmp/work/$arch/$pkg/$v/temp/$file oelogs/$arch/${pkg}_$v/$file
+    done
