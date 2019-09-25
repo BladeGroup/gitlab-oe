@@ -1,6 +1,11 @@
 #!/bin/sh
 set -e
 
+die() {
+    echo >&2 "ERROR: $*"
+    exit 1
+}
+
 B=""
 GEN=""
 DST=""
