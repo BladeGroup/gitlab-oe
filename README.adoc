@@ -54,6 +54,8 @@ patches welcomed.
 - usage through a submodule hits a limitation of current gitlab, where
   we must refer to the same submodule sha1 in the `gitlab-ci.yml`'s
   `include:file` statement
+- using `after_script` does not cause the job to fail if one of the
+  deploying commands fail
 
 planned evolutions:
 
