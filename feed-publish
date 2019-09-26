@@ -61,4 +61,5 @@ if [ -n "$PORT" ]; then
     export RSYNC_RSH="ssh -p '$PORT'"
 fi
 
-rsync -av --delete-after "${B}/tmp/deploy/${PKGTYPE}/" "${DST}/${ARCH}/${FEED}"
+rsync -a --info=stats2 \
+      --delete-after "${B}/tmp/deploy/${PKGTYPE}/" "${DST}/${ARCH}/${FEED}"
