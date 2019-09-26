@@ -56,6 +56,8 @@ patches welcomed.
   `include:file` statement
 - using `after_script` does not cause the job to fail if one of the
   deploying commands fail
+- canceling a job from Gitlab does not fully cancel it (may be linked
+  to the double-interrupt idiom designed for interractive use)
 
 planned evolutions:
 
