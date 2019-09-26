@@ -20,6 +20,7 @@
 
 .oe_deploy:
   after_script:
+    - set -x
     - ./ci/feed-publish --dir "${B}" --arch "${UPDATE_ARCH}" --feed "$BASEBRANCHNAME" --rsync-to "${RSYNC_REPO_SRV}" --ssh-port "${RSYNC_REPO_PORT}"
     - ./ci/sstate-publish --dir "${B}" --sstate-gen "${BUILD_GEN}" --rsync-to "${RSYNC_SSTATE_SRV}" --ssh-port "${RSYNC_SSTATE_PORT}"
 
