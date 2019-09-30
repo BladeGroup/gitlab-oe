@@ -1,0 +1,3 @@
+= Changes with possible impact on caller project
+
+* log artifacts are now in generic artifacts/ directory rather than in oelogs/

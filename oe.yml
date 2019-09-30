@@ -32,4 +32,4 @@
     name: "oe-logs-${UPDATE_ARCH}-${CI_JOB_ID}"
     when: always
     paths:
-      - "oelogs/*/*/*"
+      - "artifacts/"

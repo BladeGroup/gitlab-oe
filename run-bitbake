@@ -31,13 +31,13 @@ done
 
 ./ci/run --dir "$B" bitbake "$@"
 
-mkdir -p oelogs
+mkdir -p artifacts
 find build \
      -path 'build/tmp/work/*/*/*/temp/log.*.*' \
      -not -name '*_setscene.*' \
      -not -name '*.do_rm_work*' |
     sed s,^build/tmp/work/,, |
     while IFS=/ read arch pkg v _temp file; do
-        mkdir -p oelogs/$arch/${pkg}_$v
-        ln build/tmp/work/$arch/$pkg/$v/temp/$file oelogs/$arch/${pkg}_$v/$file
+        mkdir -p artifacts/$arch/${pkg}_$v
+        ln build/tmp/work/$arch/$pkg/$v/temp/$file artifacts/$arch/${pkg}_$v/$file
     done

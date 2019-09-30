@@ -58,6 +58,10 @@ patches welcomed.
   deploying commands fail
 - canceling a job from Gitlab does not fully cancel it (may be linked
   to the double-interrupt idiom designed for interractive use)
+- the deploy scripts have to hijack the whole `artifacts:paths`
+  definition; to mitigate this, we create a directory named
+  `artifacts` in which your own scripts can add other files you want
+  saved as artifacts
 
 planned evolutions:
 
@@ -65,6 +69,17 @@ planned evolutions:
 - get gitlab-ci to support submodules natively
 - add a safety net to avoid sha1 discrepancy between `/ci` and
   `/.gitlab-ci.yml`
+
+== how to use
+
+NOTE:: this section is far from exhaustive, please refer to the
+"example use" and read `oe.yml` to use.
+
+=== using a newer version
+
+* update the scripts (eg. `git add` the newer version of submodule)
+* update `include` sha1 in `.gitlab-ci.yl`
+* check what changed in <<NEWS.adoc#NEWS file>> since the previous version
 
 == example use
 
