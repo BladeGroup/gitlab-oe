@@ -64,6 +64,8 @@ patches welcomed.
   definition; to mitigate this, we create a directory named
   `artifacts` in which your own scripts can add other files you want
   saved as artifacts
+- cleanup of copy-on-write shared-state currently has to be done
+  manually (annoying in combination with `BASEGEN_ALLOWED_BRANCHES`)
 
 planned evolutions:
 
