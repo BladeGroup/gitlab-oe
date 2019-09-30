@@ -13,6 +13,7 @@ DL_DIR=""
 HISTREPO=""
 HISTREF=""
 PRSERV=""
+BASEGEN_ALLOWED_BRANCHES=""
 while [ $# -gt 1 ]; do
     case "$1" in
         --dir)
@@ -41,6 +42,10 @@ while [ $# -gt 1 ]; do
             ;;
         --prserv)
             PRSERV="$2"
+            shift
+            ;;
+        --basegen-allowed-branches)
+            BASEGEN_ALLOWED_BRANCHES="${2}"
             shift
             ;;
         --)
@@ -76,7 +81,14 @@ case "$GEN" in
             [ -e "${BASESSTATE}" ] || die "Could not find base sstate '${BASESSTATE}'"
             cp -al "${BASESSTATE}" "${SSTATE}"
         fi
-    ;;
+        ;;
+    *)
+        if [ -n "$BASEGEN_ALLOWED_BRANCHES" ]; then
+            echo $BASEGEN_ALLOWED_BRANCHES | tr ' ' '\n' | grep -qxF "$CI_COMMIT_REF_NAME" ||
+                die "branch '$CI_COMMIT_REF_NAME' is NOT allowed to contribute to base sstate cache"
+            echo "NOTE: branch '$CI_COMMIT_REF_NAME' allowed to contribute to base sstate cache"
+        fi
+        ;;
 esac
 
 if [ -r "$B"/conf/local.conf ]; then

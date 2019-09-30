@@ -19,6 +19,8 @@ This includes:
   toolchain change)
 - copy-on-write shared-state for use in dev branches to limit cache
   polution and inflation (eg. `BUILD_GEN: 1.2+mytest`)
+- (optional) protection from shared-state polution by forcing
+  non-official branches to use copy-on-write shared-state
 - (non-optional) usage of buildhistory repo and PR server
 - buildhistory stored in seprate branches for each platform and each
   source branch
