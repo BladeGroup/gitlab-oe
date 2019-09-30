@@ -17,9 +17,6 @@
   before_script:
     - BASEBRANCHNAME="${CI_COMMIT_REF_NAME#${BRANCHPREFIX_ARCH}/}"
     - ./ci/mkconf --dir "${B}" --sstate-gen "${BUILD_GEN}" --download-dir "${HOME}/downloads-${POKY_BASE}" --template-conf "$PWD/conf-${BRANCHPREFIX_ARCH}" --buildhistory-repo "$BUILDHISTREPO" --buildhistory-ref "${BRANCHPREFIX_ARCH}/$BASEBRANCHNAME" --prserv "$PRSERV"
-    # ensure early that deploy servers are reachable
-    - ssh -p "${RSYNC_REPO_PORT}" "${RSYNC_REPO_SRV}" true
-    - ssh -p "${RSYNC_SSTATE_PORT}" "${RSYNC_SSTATE_SRV}" true
 
 .oe_deploy:
   after_script:

@@ -69,6 +69,7 @@ planned evolutions:
 - get gitlab-ci to support submodules natively
 - add a safety net to avoid sha1 discrepancy between `/ci` and
   `/.gitlab-ci.yml`
+- check reachability of deploy servers before starting the build
 
 == how to use
 
