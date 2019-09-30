@@ -78,8 +78,8 @@ NOTE:: this section is far from exhaustive, please refer to the
 === using a newer version
 
 * update the scripts (eg. `git add` the newer version of submodule)
-* update `include` sha1 in `.gitlab-ci.yl`
-* check what changed in <<NEWS.adoc#NEWS file>> since the previous version
+* update `include` sha1 in <<.gitlab-ci.yl>>
+* check what changed in <<NEWS.adoc>> since the previous version
 
 == example use
 
