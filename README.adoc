@@ -74,7 +74,8 @@ planned evolutions:
 == how to use
 
 NOTE:: this section is far from exhaustive, please refer to the
-"example use" and read `oe.yml` to use.
+"example use" and read `oe.yml` to use.  Most notably, variables
+required by the various job templates are defined inside `oe.yml`.
 
 === using a newer version
 

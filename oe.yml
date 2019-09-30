@@ -1,4 +1,4 @@
-# needs project-level variables
+# needs project-level variables (configured in gitlab's CI settings)
 # - RSYNC_REPO_SRV: rsync url to publish package feeds
 # - RSYNC_REPO_PORT (optional): ssh port to join rsync server for package feeds
 # - RSYNC_SSTATE_SRV: rsync url to publish shared-state cache
