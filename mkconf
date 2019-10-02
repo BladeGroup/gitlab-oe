@@ -14,6 +14,7 @@ HISTREPO=""
 HISTREF=""
 PRSERV=""
 BASEGEN_ALLOWED_BRANCHES=""
+USE_CACHE=1
 while [ $# -gt 1 ]; do
     case "$1" in
         --dir)
@@ -46,6 +47,10 @@ while [ $# -gt 1 ]; do
             ;;
         --basegen-allowed-branches)
             BASEGEN_ALLOWED_BRANCHES="${2}"
+            shift
+            ;;
+        --no-cache)
+            USE_CACHE=0
             shift
             ;;
         --)
@@ -112,10 +117,16 @@ else
     git clone "$HISTREPO" buildhistory
 
     # adjust conf
-    cat >> "conf/local.conf" <<EOF
+    if [ $USE_CACHE = 1 ]; then
+        cat >> "conf/local.conf" <<EOF
 
 DL_DIR = "${DL_DIR}"
 SSTATE_DIR = "${SSTATE}"
+EOF
+    fi
+
+    cat >> "conf/local.conf" <<EOF
+
 RM_WORK_EXCLUDE = ""
 
 INHERIT += "buildhistory"
