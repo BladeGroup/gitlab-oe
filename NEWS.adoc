@@ -1,4 +1,7 @@
 = Changes with possible impact on caller project
 
+* MKCONF_OPTS opts can now be used to pass extra flags to <<mkconf>>,
+  notably `--no-cache` for full-rebuilds
+
 * log artifacts are now in generic `artifacts/` directory rather than
   in `oelogs/`
