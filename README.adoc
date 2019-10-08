@@ -25,7 +25,7 @@ This includes:
 - buildhistory stored in seprate branches for each platform and each
   source branch
 - archiving of interesting task logs as build artifacts (filtering out
-  setscene and rm_work)
+  setscene and rm_work), even when bitbake ultimately fails
 
 == assumptions on project setup
 
