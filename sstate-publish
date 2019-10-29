@@ -50,6 +50,20 @@ if [ -n "$PORT" ]; then
     export RSYNC_RSH="ssh -p '$PORT'"
 fi
 
-rsync -a --info=stats2 \
-      ~/sstate-cache-"${GEN}" \
+SSTATE=~/sstate-cache-"${GEN}"
+
+case "$GEN" in
+    *+*)
+        BASEGEN=${GEN%+*}
+        BASESSTATE=~/sstate-cache-"$BASEGEN"
+        SSTATES="$BASESSTATE $SSTATE"
+        ;;
+    *)
+        SSTATES="$SSTATE"
+        ;;
+esac
+
+
+rsync -aH --info=stats2 \
+      $SSTATES \
       "$DST"
