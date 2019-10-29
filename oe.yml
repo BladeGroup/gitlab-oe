@@ -25,7 +25,7 @@
   after_script:
     - BASEBRANCHNAME="${CI_COMMIT_REF_NAME#${BRANCHPREFIX_ARCH}/}"
     - ./ci/feed-publish --dir "${B}" --arch "${UPDATE_ARCH}" --feed "$BASEBRANCHNAME" --rsync-to "${RSYNC_REPO_SRV}" --ssh-port "${RSYNC_REPO_PORT}"
-    - ./ci/sstate-publish --dir "${B}" --sstate-gen "${BUILD_GEN}" --rsync-to "${RSYNC_SSTATE_SRV}" --ssh-port "${RSYNC_SSTATE_PORT}"
+    - ./ci/sstate-publish --sstate-gen "${BUILD_GEN}" --rsync-to "${RSYNC_SSTATE_SRV}" --ssh-port "${RSYNC_SSTATE_PORT}"
 
 .oe_buildlogs_artifacts:
   artifacts:
