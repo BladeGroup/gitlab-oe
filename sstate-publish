@@ -64,6 +64,6 @@ case "$GEN" in
 esac
 
 
-rsync -aH --info=stats2 \
+rsync -aH --info=stats2 "$@" \
       $SSTATES \
       "$DST"
