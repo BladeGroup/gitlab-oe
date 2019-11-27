@@ -1,0 +1,83 @@
+#!/bin/bash
+set -e
+
+die()
+{
+    echo >&2 "ERROR: $*"
+    exit 1
+}
+
+usage()
+{
+    cat <<EOF
+Usage: $(basename $0) [options] ../sstates/"
+
+Options:
+    --prune                remove local shared-state files not on server (rsync --delete)
+    --gen <sstate-gen>     sstate generation to fetch (default '$GEN')
+    --repo <rsync-path>    source sstates repository
+    --help                 guess what
+EOF
+}
+
+die_usage()
+{
+    echo >&2 "ERROR: $*"
+    usage
+    exit 1
+}
+
+GITTOP=$(git rev-parse --show-toplevel)
+[ -r "$GITTOP" ] || die "failed to locate git toplevel, cannot read '$GITTOP'"
+[ -r "$GITTOP/.gitlab-ci.yml" ] || die "failed to locate git toplevel, cannot read '$GITTOP/.gitlab-ci.yml'"
+
+# defaults before config and cli parsing
+
+EXTRAFLAGS=()
+GEN=$(grep BUILD_GEN .gitlab-ci.yml | sed 's/ *BUILD_GEN: *"\(.*\)"/\1/')
+
+# config file
+
+for conffile in "$GITTOP/.gitlab-oe.conf" ~/.gitlab-oe.conf; do
+    [ -r "$conffile" ] || continue
+    . "$conffile"
+    break # only use the first existing config
+done
+
+# comand line
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --gen) GEN="$2"; shift ;;
+        --prune) EXTRAFLAGS+=(--delete) ;;
+        --repo) REPO="$2"; shift ;;
+        --help) usage; exit 0 ;;
+        *) break ;;
+    esac
+    shift
+done
+
+[ $# = 1 ] || die_usage "exactly one argument expected"
+DEST="$1"
+
+[ -n "$GEN" ] || die "cannot determine sstate generation"
+
+# core
+
+SSTATE="${REPO}/sstate-cache-${GEN}"
+
+case "$GEN" in
+    *+*)
+        BASEGEN=${GEN%+*}
+        BASESSTATE="${REPO}/sstate-cache-${BASEGEN}"
+        SSTATES="$BASESSTATE $SSTATE"
+        ;;
+    *)
+        SSTATES="$SSTATE"
+        ;;
+esac
+
+
+rsync --rsh "ssh -p 1023" -aHv \
+      "${EXTRAFLAGS[@]}" \
+      $SSTATES "$DEST"

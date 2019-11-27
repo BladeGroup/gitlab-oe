@@ -1,4 +1,6 @@
 = Changes with possible impact on caller project
 
+* new rsync-sstate script to download shared state uploaded by the build
+
 * log artifacts are now in generic `artifacts/` directory rather than
   in `oelogs/`

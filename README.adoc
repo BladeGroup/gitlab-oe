@@ -152,3 +152,19 @@ required by the various job templates are defined inside `oe.yml`.
     script:
       - ./ci/run-bitbake --dir ${B} -- ${IMGROOT} -c populate_sdk
       - tar -C $B/tmp/deploy/sdk/ -cvf - . --xform=s,^.,${YOCTO_ARCH}/${BASEBRANCHNAME}, | ssh -p ${SSH_SDK_PORT} ${SSH_SDK_SRV} tar -C ${SSH_SDK_DIR} -xf -
+
+
+== using the server's shared-state
+
+The `rsync-sstate` script will mirror the shared-state uploaded to a
+server after the build.  The rsync URL for the shared-state repo can
+be specified in a `.gitlab-oe.conf` at the toplevel of your git
+repository, alongside `.gitlab-ci.yml`.  It can be overriden by the
+`--repo` flag if needed.
+
+The shared-state generation will be read from `.gitlab-ci.yml`, and
+can be overriden by the `--gen` flag.
+
+=== example `.gitlab-oe.conf` config
+
+ REPO=user@host:/path/to/sstates
