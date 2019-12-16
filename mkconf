@@ -77,10 +77,10 @@ case "$GEN" in
     *+*)
         BASEGEN=${GEN%+*}
         BASESSTATE="${HOME}/sstate-cache-$BASEGEN"
-        if [ ! -e "${SSTATE}" ]; then
-            [ -e "${BASESSTATE}" ] || die "Could not find base sstate '${BASESSTATE}'"
-            cp -al "${BASESSTATE}" "${SSTATE}"
-        fi
+        # init from / resync with BASESSTATE
+        [ -e "${BASESSTATE}" ] || die "Could not find base sstate '${BASESSTATE}'"
+        mkdir -p "${SSTATE}"
+        cp -alf "${BASESSTATE}"/* "${SSTATE}"
         ;;
     *)
         if [ -n "$BASEGEN_ALLOWED_BRANCHES" ]; then

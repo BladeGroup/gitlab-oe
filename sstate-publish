@@ -6,16 +6,11 @@ die() {
     exit 1
 }
 
-B=""
 GEN=""
 DST=""
 PORT=""
 while [ $# -gt 1 ]; do
     case "$1" in
-        --dir)
-            B="$2"
-            shift
-            ;;
         --sstate-gen)
             GEN="$2"
             shift
@@ -42,7 +37,6 @@ while [ $# -gt 1 ]; do
     shift
 done
 
-[ -n "$B" ] || die "missing --dir"
 [ -n "$GEN" ] || die "missing --sstate-gen"
 [ -n "$DST" ] || die "missing --rsync-to"
 
@@ -50,6 +44,20 @@ if [ -n "$PORT" ]; then
     export RSYNC_RSH="ssh -p '$PORT'"
 fi
 
-rsync -a --info=stats2 \
-      ~/sstate-cache-"${GEN}" \
+SSTATE=~/sstate-cache-"${GEN}"
+
+case "$GEN" in
+    *+*)
+        BASEGEN=${GEN%+*}
+        BASESSTATE=~/sstate-cache-"$BASEGEN"
+        SSTATES="$BASESSTATE $SSTATE"
+        ;;
+    *)
+        SSTATES="$SSTATE"
+        ;;
+esac
+
+
+rsync -aH --info=stats2 "$@" \
+      $SSTATES \
       "$DST"
