@@ -28,6 +28,10 @@ while [ $# -gt 1 ]; do
 done
 
 [ -d "$B" ] || die "directory '$B' does not exist"
+[ -r "$B"/conf/oe-env ] || die "file '$B'/conf/oe-env does not exist"
 
-. poky/oe-init-build-env "$B"
+OEENV=$(cat "$B/conf/oe-env")
+[ -r "$OEENV" ] || die "cannot read '$OEENV', get '$B/conf/oe-env' fixed!"
+
+. "$OEENV" "$B"
 "$@"

@@ -14,6 +14,7 @@ HISTREPO=""
 HISTREF=""
 PRSERV=""
 BASEGEN_ALLOWED_BRANCHES=""
+OEENV="poky/oe-init-build-env"
 while [ $# -gt 1 ]; do
     case "$1" in
         --dir)
@@ -48,6 +49,10 @@ while [ $# -gt 1 ]; do
             BASEGEN_ALLOWED_BRANCHES="${2}"
             shift
             ;;
+        --oe-env)
+            OEENV="${2}"
+            shift
+            ;;
         --)
             shift
             break
@@ -69,6 +74,7 @@ done
 [ -n "$HISTREPO" ] || die "missing --buildhistory-repo"
 [ -n "$HISTREF" ] || die "missing --buildhistory-ref"
 [ -n "$PRSERV" ] || die "missing --prserv"
+[ -r "$OEENV" ] || die "cannot read '$OEENV', adjust with --oe-env"
 
 
 SSTATE="${HOME}/sstate-cache-$GEN"
@@ -92,10 +98,11 @@ case "$GEN" in
 esac
 
 if [ -r "$B"/conf/local.conf ]; then
-    . poky/oe-init-build-env "$B"
+    . "$OEENV" "$B"
 
 else
-    TEMPLATECONF="$TEMPLATECONF" . poky/oe-init-build-env "$B"
+    TEMPLATECONF="$TEMPLATECONF" . "$OEENV" "$B"
+    echo "$OEENV" > conf/oe-env
 
     # make sure the branch is current so shadow-image identifies
     # BRANCHNAME (unless CI_COMMIT_REF_NAME does not match the sha -

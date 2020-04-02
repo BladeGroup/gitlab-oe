@@ -5,6 +5,7 @@
 # - RSYNC_SSTATE_PORT (optional): ssh port to join rsync server for  shared-state cache
 # needs global variables:
 # - POKY_BASE: poky version nickname for separate download dirs
+# - POKY_ENVINIT: shell scriptlet to initialize oe environement (eg. "poky/oe-init-build-env")
 # - B: oe build directory
 # - BUILD_GEN: generation for separate shared-states
 # - BUILDHISTREPO: git buildhistory repository
@@ -19,7 +20,7 @@
 .oe_setup:
   before_script:
     - BASEBRANCHNAME="${CI_COMMIT_REF_NAME#${BRANCHPREFIX_ARCH}/}"
-    - ./ci/mkconf --dir "${B}" --sstate-gen "${BUILD_GEN}" --download-dir "${HOME}/downloads-${POKY_BASE}" --template-conf "$PWD/conf-${BRANCHPREFIX_ARCH}" --buildhistory-repo "$BUILDHISTREPO" --buildhistory-ref "${BRANCHPREFIX_ARCH}/$BASEBRANCHNAME" --prserv "$PRSERV" --basegen-allowed-branches "$BASEGEN_ALLOWED_BRANCHES"
+    - ./ci/mkconf --dir "${B}" --sstate-gen "${BUILD_GEN}" --download-dir "${HOME}/downloads-${POKY_BASE}" --template-conf "$PWD/conf-${BRANCHPREFIX_ARCH}" --buildhistory-repo "$BUILDHISTREPO" --buildhistory-ref "${BRANCHPREFIX_ARCH}/$BASEBRANCHNAME" --prserv "$PRSERV" --basegen-allowed-branches "$BASEGEN_ALLOWED_BRANCHES" --oe-env "${POKY_ENVINIT}"
 
 .oe_deploy:
   after_script:

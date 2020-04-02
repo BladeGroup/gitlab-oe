@@ -1,5 +1,8 @@
 = Changes with possible impact on caller project
 
+* location of poky tree is not hardcoded any more, must now be specified
+  through POKY_ENVINIT variable
+
 * new rsync-sstate script to download shared state uploaded by the build
 
 * log artifacts are now in generic `artifacts/` directory rather than
