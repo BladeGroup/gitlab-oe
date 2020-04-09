@@ -66,6 +66,10 @@ patches welcomed.
   saved as artifacts
 - cleanup of copy-on-write shared-state currently has to be done
   manually (annoying in combination with `BASEGEN_ALLOWED_BRANCHES`)
+- buildhistory push is not robust about any change done concurently
+  during the build (limits the single shell runner to one job at a
+  time - but anyway there's no job control in place today to make
+  running several of them concurently on the same runner)
 
 planned evolutions:
 
@@ -74,6 +78,7 @@ planned evolutions:
 - add a safety net to avoid sha1 discrepancy between `/ci` and
   `/.gitlab-ci.yml`
 - check reachability of deploy servers before starting the build
+- auto-management of buildhistory branches, mirroring source history
 
 == how to use
 
@@ -138,7 +143,6 @@ required by the various job templates are defined inside `oe.yml`.
       - ./ci/run-bitbake --dir "${B}" -- -k core-image-x11 my-packagegroup
   # save/deploy artifacts
       - ./ci-my-images-deploy ...
-      - git -C "$B/buildhistory" push origin HEAD
   
   board1-sdk:
     variables:

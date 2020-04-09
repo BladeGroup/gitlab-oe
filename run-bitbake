@@ -48,6 +48,9 @@ find build \
         ln build/tmp/work/$arch/$pkg/$v/temp/$file artifacts/$arch/${pkg}_$v/$file
     done
 
+# publish build history
+git -C "$B/buildhistory" push origin HEAD
+
 # END poor man's after_script
 
 exit $BB_RET
