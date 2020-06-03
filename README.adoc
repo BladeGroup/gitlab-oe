@@ -26,6 +26,8 @@ This includes:
   source branch
 - archiving of interesting task logs as build artifacts (filtering out
   setscene and rm_work), even when bitbake ultimately fails
+- archiving of cooker log as build artifact, as the log of a full builds
+  can exceed gitlab's job-log size limit
 
 == assumptions on project setup
 
