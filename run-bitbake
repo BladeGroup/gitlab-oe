@@ -50,7 +50,7 @@ find build \
 
 # cooker logs, more easily accessible than in the job jog
 mkdir -p artifacts/cooker
-mv $(find build/tmp/log/cooker -type f) artifacts/cooker
+cp $(find build/tmp/log/cooker -type f) artifacts/cooker
 
 # publish build history
 git -C "$B/buildhistory" push origin HEAD
