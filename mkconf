@@ -128,6 +128,9 @@ RM_WORK_EXCLUDE = ""
 INHERIT += "buildhistory"
 BUILDHISTORY_COMMIT = "1"
 BUILDHISTORY_FEATURES = "image"
+
+INHERIT += "buildstats"
+INHERIT += "buildstats-summary"
 EOF
 
     sed -i 's/^PRSERV_HOST = .*/PRSERV_HOST = "'"$PRSERV"'"/' "conf/local.conf"

@@ -52,6 +52,9 @@ find build \
 mkdir -p artifacts/cooker
 cp $(find "$B/tmp/log/cooker" -type f) artifacts/cooker/
 
+# build stats for separate analysis
+cp -al "$B/tmp/buildstats"  artifacts/
+
 # publish build history
 git -C "$B/buildhistory" push origin HEAD
 
