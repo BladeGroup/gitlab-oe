@@ -71,11 +71,15 @@ done
 [ -n "$TEMPLATECONF" ] || die "missing --template-conf"
 [ -n "$GEN" ] || die "missing --sstate-gen"
 [ -n "$DL_DIR" ] || die "missing --download-dir"
-[ -n "$HISTREPO" ] || die "missing --buildhistory-repo"
-[ -n "$HISTREF" ] || die "missing --buildhistory-ref"
 [ -n "$PRSERV" ] || die "missing --prserv"
 [ -r "$OEENV" ] || die "cannot read '$OEENV', adjust with --oe-env"
 
+if [ -n "$HISTREPO" -a -z "$HISTREF" ]; then
+    die "--buildhistory-repo requries --buildhistory-ref"
+fi
+if [ -n "$HISTREF" -a -z "$HISTREPO" ]; then
+    die "--buildhistory-ref requries --buildhistory-repo"
+fi
 
 SSTATE="${HOME}/sstate-cache-$GEN"
 SSTATE_MIRRORS=""
@@ -123,8 +127,16 @@ else
         test $(git rev-parse HEAD) = ${CI_COMMIT_SHA}
     fi
 
-    git clone "$HISTREPO" buildhistory
-    git -C buildhistory checkout "$HISTREF"
+    if [ -n "$HISTREPO" ]; then
+        git clone "$HISTREPO" buildhistory
+        git -C buildhistory checkout "$HISTREF"
+        cat >> "conf/local.conf" <<EOF
+
+INHERIT += "buildhistory"
+BUILDHISTORY_COMMIT = "1"
+BUILDHISTORY_FEATURES = "image"
+EOF
+    fi
 
     # adjust conf
     cat >> "conf/local.conf" <<EOF
@@ -132,10 +144,6 @@ else
 DL_DIR = "${DL_DIR}"
 SSTATE_DIR = "${SSTATE}"
 RM_WORK_EXCLUDE = ""
-
-INHERIT += "buildhistory"
-BUILDHISTORY_COMMIT = "1"
-BUILDHISTORY_FEATURES = "image"
 
 INHERIT += "buildstats"
 INHERIT += "buildstats-summary"
