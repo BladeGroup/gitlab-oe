@@ -124,6 +124,7 @@ else
     fi
 
     git clone "$HISTREPO" buildhistory
+    git -C buildhistory checkout "$HISTREF"
 
     # adjust conf
     cat >> "conf/local.conf" <<EOF
@@ -150,5 +151,3 @@ EOF
 
     sed -i 's/^PRSERV_HOST = .*/PRSERV_HOST = "'"$PRSERV"'"/' "conf/local.conf"
 fi
-
-git -C buildhistory checkout "$HISTREF"
