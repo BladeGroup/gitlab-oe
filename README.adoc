@@ -89,6 +89,12 @@ NOTE:: this section is far from exhaustive, please refer to the
 "example use" and read `oe.yml` to use.  Most notably, variables
 required by the various job templates are defined inside `oe.yml`.
 
+=== debugging
+
+You may run `mkconf` from your own working copy to see if the
+generated build configuration meets your expectations.  It will
+emulate being running by gitlab-ci from your current branch.
+
 === using a newer version
 
 * update the scripts (eg. `git add` the newer version of submodule)

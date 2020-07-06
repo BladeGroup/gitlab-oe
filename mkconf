@@ -6,6 +6,10 @@ die() {
     exit 1
 }
 
+# emulate gitalb-ci environment when run from working copy
+: ${CI_COMMIT_REF_NAME:=$(git symbolic-ref --short HEAD)}
+: ${CI_COMMIT_SHA:=$(git rev-parse "${CI_COMMIT_REF_NAME}")}
+
 B=""
 TEMPLATECONF=""
 GEN=""
