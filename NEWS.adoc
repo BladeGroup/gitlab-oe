@@ -1,6 +1,6 @@
 = Changes with possible impact on caller project
 
-* buildhistory support is now optional
+* buildhistory and prserv support are now optional
 
 * copy-on-write sstate handling is now replaced by use of SSTATE_MIRRORS,
   local.conf in local build tree must be adjusted
