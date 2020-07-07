@@ -8,11 +8,12 @@
 # - POKY_ENVINIT: shell scriptlet to initialize oe environement (eg. "poky/oe-init-build-env")
 # - B: oe build directory
 # - BUILD_GEN: generation for separate shared-states
-# - BUILDHISTREPO: git buildhistory repository
-# - PRSERV: suitable value for PRSERV_HOST in local.conf
 # - BASEGEN_ALLOWED_BRANCHES (optional): space-separated list of branches allowed to contribute
 #   to a "base" (ie. without "+<suffix>"), to avoid accidental sstate polution (default empty,
 #   meaning "no restriction")
+# recommended global variables:
+# - BUILDHISTREPO: git buildhistory repository
+# - PRSERV: suitable value for PRSERV_HOST in local.conf
 # needs platform variables:
 # - BRANCHPREFIX_ARCH: for conf template directory and buildhistory branch prefix
 # - UPDATE_ARCH: used to separate feeds for different architectures

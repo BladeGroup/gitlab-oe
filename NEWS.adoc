@@ -1,5 +1,10 @@
 = Changes with possible impact on caller project
 
+* buildhistory and prserv support are now optional
+
+* copy-on-write sstate handling is now replaced by use of SSTATE_MIRRORS,
+  local.conf in local build tree must be adjusted
+
 * location of poky tree is not hardcoded any more, must now be specified
   through POKY_ENVINIT variable
 

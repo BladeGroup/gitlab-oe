@@ -6,6 +6,10 @@ die() {
     exit 1
 }
 
+# emulate gitalb-ci environment when run from working copy
+: ${CI_COMMIT_REF_NAME:=$(git symbolic-ref --short HEAD)}
+: ${CI_COMMIT_SHA:=$(git rev-parse "${CI_COMMIT_REF_NAME}")}
+
 B=""
 TEMPLATECONF=""
 GEN=""
@@ -71,22 +75,32 @@ done
 [ -n "$TEMPLATECONF" ] || die "missing --template-conf"
 [ -n "$GEN" ] || die "missing --sstate-gen"
 [ -n "$DL_DIR" ] || die "missing --download-dir"
-[ -n "$HISTREPO" ] || die "missing --buildhistory-repo"
-[ -n "$HISTREF" ] || die "missing --buildhistory-ref"
-[ -n "$PRSERV" ] || die "missing --prserv"
 [ -r "$OEENV" ] || die "cannot read '$OEENV', adjust with --oe-env"
 
+if [ -n "$HISTREPO" -a -z "$HISTREF" ]; then
+    die "--buildhistory-repo requries --buildhistory-ref"
+fi
+if [ -n "$HISTREF" -a -z "$HISTREPO" ]; then
+    die "--buildhistory-ref requries --buildhistory-repo"
+fi
 
 SSTATE="${HOME}/sstate-cache-$GEN"
+SSTATE_MIRRORS=""
 
 case "$GEN" in
     *+*)
-        BASEGEN=${GEN%+*}
-        BASESSTATE="${HOME}/sstate-cache-$BASEGEN"
-        # init from / resync with BASESSTATE
-        [ -e "${BASESSTATE}" ] || die "Could not find base sstate '${BASESSTATE}'"
-        mkdir -p "${SSTATE}"
-        cp -alf "${BASESSTATE}"/* "${SSTATE}"
+        BASEGEN=$GEN
+        while true; do
+            case "$BASEGEN" in
+                *+*)
+                    BASEGEN=${BASEGEN%+*}
+                    SSTATE_MIRRORS="$SSTATE_MIRRORS ${HOME}/sstate-cache-$BASEGEN"
+                    ;;
+                *)
+                    break
+                    ;;
+            esac
+        done
         ;;
     *)
         if [ -n "$BASEGEN_ALLOWED_BRANCHES" ]; then
@@ -116,7 +130,16 @@ else
         test $(git rev-parse HEAD) = ${CI_COMMIT_SHA}
     fi
 
-    git clone "$HISTREPO" buildhistory
+    if [ -n "$HISTREPO" ]; then
+        git clone "$HISTREPO" buildhistory
+        git -C buildhistory checkout "$HISTREF"
+        cat >> "conf/local.conf" <<EOF
+
+INHERIT += "buildhistory"
+BUILDHISTORY_COMMIT = "1"
+BUILDHISTORY_FEATURES = "image"
+EOF
+    fi
 
     # adjust conf
     cat >> "conf/local.conf" <<EOF
@@ -125,15 +148,19 @@ DL_DIR = "${DL_DIR}"
 SSTATE_DIR = "${SSTATE}"
 RM_WORK_EXCLUDE = ""
 
-INHERIT += "buildhistory"
-BUILDHISTORY_COMMIT = "1"
-BUILDHISTORY_FEATURES = "image"
-
 INHERIT += "buildstats"
 INHERIT += "buildstats-summary"
 EOF
 
-    sed -i 's/^PRSERV_HOST = .*/PRSERV_HOST = "'"$PRSERV"'"/' "conf/local.conf"
-fi
+    if [ -n "$SSTATE_MIRRORS" ]; then
+        echo 'SSTATE_MIRRORS ?= "\' >> "conf/local.conf"
+        for m in $SSTATE_MIRRORS; do
+            echo "file://.* file://$m/PATH \\n \\" >> "conf/local.conf"
+        done
+        echo '"' >> "conf/local.conf"
+    fi
 
-git -C buildhistory checkout "$HISTREF"
+    if [ -n "$PRSERV" ]; then
+        sed -i 's/^PRSERV_HOST = .*/PRSERV_HOST = "'"$PRSERV"'"/' "conf/local.conf"
+    fi
+fi

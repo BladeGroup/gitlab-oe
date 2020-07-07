@@ -17,11 +17,11 @@ This includes:
 - different downloads directories between major poky versions
 - different shared-state directories when you decide it (typically on
   toolchain change)
-- copy-on-write shared-state for use in dev branches to limit cache
-  polution and inflation (eg. `BUILD_GEN: 1.2+mytest`)
+- cascading inheritance of shared-state for use in dev branches to limit
+  cache polution and inflation (eg. `BUILD_GEN: 1.2+next+mytest`)
 - (optional) protection from shared-state polution by forcing
   non-official branches to use copy-on-write shared-state
-- (non-optional) usage of buildhistory repo and PR server
+- optional usage of buildhistory repo and PR server
 - buildhistory stored in seprate branches for each platform and each
   source branch
 - archiving of interesting task logs as build artifacts (filtering out
@@ -37,9 +37,10 @@ This includes:
 - yocto project's Poky repository is available in your project repo as
   `/poky`
 - all other layers are available after checkout
-- `$BUILDHISTREPO` must be writable from your gitlab-ci user
+- if specified, `$BUILDHISTREPO` must be writable from your gitlab-ci user
 - you have set up a PR server, accessible from your runner (which
   assumes both are located inside of a trusted network)
+- local.conf sets `RM_WORK_EXCLUDE = ""` for maximal reuse of shared-state
 
 This has been only used with a submodule-based setup, other setups may
 work too (eg. using git subtrees or Android's `repo`), examples and
@@ -75,7 +76,7 @@ patches welcomed.
 
 planned evolutions:
 
-- support docker-based runners
+- support docker-based runners (investigate CROPS and Pyrex)
 - get gitlab-ci to support submodules natively
 - add a safety net to avoid sha1 discrepancy between `/ci` and
   `/.gitlab-ci.yml`
@@ -87,6 +88,12 @@ planned evolutions:
 NOTE:: this section is far from exhaustive, please refer to the
 "example use" and read `oe.yml` to use.  Most notably, variables
 required by the various job templates are defined inside `oe.yml`.
+
+=== debugging
+
+You may run `mkconf` from your own working copy to see if the
+generated build configuration meets your expectations.  It will
+emulate being running by gitlab-ci from your current branch.
 
 === using a newer version
 
@@ -170,6 +177,20 @@ repository, alongside `.gitlab-ci.yml`.  It can be overriden by the
 
 The shared-state generation will be read from `.gitlab-ci.yml`, and
 can be overriden by the `--gen` flag.
+
+If your `BUILD_GEN` is set to `1.2+next+mytest`, you must set
+`SSTATE_MIRRORS` to make use or `1.2+next` and `1.2`, or the artifacts
+provided by those base shared-states won't be visible and will be
+rebuilt.  For example:
+
+ SSTATE_MIRRORS ?= "\
+ file://.* file://${HOME}/sstates/sstate-cache-1.2/PATH \n \
+ file://.* file://${HOME}/sstates/sstate-cache-1.2+next/PATH \n \
+ "
+ SSTATE_DIR = "${HOME}/sstates/sstate-cache-3+dev"
+
+Those base sstates are fetched automatically by `rsync-sstate`.
+
 
 === example `.gitlab-oe.conf` config
 
