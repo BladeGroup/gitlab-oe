@@ -33,5 +33,6 @@
   artifacts:
     name: "oe-logs-${UPDATE_ARCH}-${CI_JOB_ID}"
     when: always
+    expire_in: never
     paths:
       - "artifacts/"

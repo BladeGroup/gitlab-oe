@@ -1,5 +1,7 @@
 = Changes with possible impact on caller project
 
+* oe-logs artifacts are now "expire_in: never", much like the job output
+
 * buildhistory and prserv support are now optional
 
 * copy-on-write sstate handling is now replaced by use of SSTATE_MIRRORS,
