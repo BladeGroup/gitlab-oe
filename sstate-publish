@@ -46,18 +46,6 @@ fi
 
 SSTATE=~/sstate-cache-"${GEN}"
 
-case "$GEN" in
-    *+*)
-        BASEGEN=${GEN%+*}
-        BASESSTATE=~/sstate-cache-"$BASEGEN"
-        SSTATES="$BASESSTATE $SSTATE"
-        ;;
-    *)
-        SSTATES="$SSTATE"
-        ;;
-esac
-
-
 rsync -aH --info=stats2 "$@" \
-      $SSTATES \
+      $SSTATE \
       "$DST"
