@@ -46,6 +46,6 @@ fi
 
 SSTATE=~/sstate-cache-"${GEN}"
 
-rsync -aH --info=stats2 "$@" \
+rsync -aH --info=stats2 --safe-links "$@" \
       $SSTATE \
       "$DST"
