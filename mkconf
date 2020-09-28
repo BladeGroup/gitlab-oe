@@ -77,6 +77,7 @@ done
 [ -r "$OEENV" ] || die "cannot read '$OEENV', adjust with --oe-env"
 
 
+TOP=$(pwd)
 SSTATE="${HOME}/sstate-cache-$GEN"
 
 case "$GEN" in
@@ -134,6 +135,11 @@ INHERIT += "buildstats-summary"
 EOF
 
     sed -i 's/^PRSERV_HOST = .*/PRSERV_HOST = "'"$PRSERV"'"/' "conf/local.conf"
+
+    if [ -r $TOP/ci-mkconf-hook.sh ]; then
+        echo "Running hook ci-mkconf-hook.sh"
+        . $TOP/ci-mkconf-hook.sh
+    fi
 fi
 
 git -C buildhistory checkout "$HISTREF"

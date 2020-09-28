@@ -1,5 +1,8 @@
 = Changes with possible impact on caller project
 
+* `local.conf` can be more easily tuned for project-specific needs
+  using new `ci-mkconf-hook.sh`
+
 * location of poky tree is not hardcoded any more, must now be specified
   through POKY_ENVINIT variable
 

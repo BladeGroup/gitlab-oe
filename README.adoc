@@ -88,6 +88,16 @@ NOTE:: this section is far from exhaustive, please refer to the
 "example use" and read `oe.yml` to use.  Most notably, variables
 required by the various job templates are defined inside `oe.yml`.
 
+Aside from gitlab-ci variables, the configuration can be further
+adjusted for the project's need using hook scripts:
+
+`ci-mkconf-hook.sh`:: a bash snippet to be sourced after creation of
+the build tree, suitable for appending project-specific variables to
+`conf/local.conf`.  It is sourced by `mkconf` after sourcing
+`poky/oe-init-build-env` (or a user-provided alternate env-setting
+script) and thus runs from within the build tree, and can use any of
+the local variables set in `mkconf`, including OE envvars.
+
 === using a newer version
 
 * update the scripts (eg. `git add` the newer version of submodule)
