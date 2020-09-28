@@ -84,6 +84,7 @@ if [ -n "$HISTREF" -a -z "$HISTREPO" ]; then
     die "--buildhistory-ref requries --buildhistory-repo"
 fi
 
+TOP=$(pwd)
 SSTATE="${HOME}/sstate-cache-$GEN"
 SSTATE_MIRRORS=""
 
@@ -162,5 +163,10 @@ EOF
 
     if [ -n "$PRSERV" ]; then
         sed -i 's/^PRSERV_HOST = .*/PRSERV_HOST = "'"$PRSERV"'"/' "conf/local.conf"
+    fi
+
+    if [ -r $TOP/ci-mkconf-hook.sh ]; then
+        echo "Running hook ci-mkconf-hook.sh"
+        . $TOP/ci-mkconf-hook.sh
     fi
 fi

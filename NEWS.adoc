@@ -1,5 +1,8 @@
 = Changes with possible impact on caller project
 
+* `local.conf` can be more easily tuned for project-specific needs
+  using new `ci-mkconf-hook.sh`
+
 * early version of SSTATE_MIRRORS usage caused absolute symlinks to
   mirrors (in ci-runner filesystem) to be rsync'd, for some yocto
   versions.  They are not sync'd any more, but any such symlink has to
