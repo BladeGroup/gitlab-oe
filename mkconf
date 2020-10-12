@@ -17,7 +17,6 @@ DL_DIR=""
 HISTREPO=""
 HISTREF=""
 PRSERV=""
-BASEGEN_ALLOWED_BRANCHES=""
 OEENV="poky/oe-init-build-env"
 while [ $# -gt 1 ]; do
     case "$1" in
@@ -47,10 +46,6 @@ while [ $# -gt 1 ]; do
             ;;
         --prserv)
             PRSERV="$2"
-            shift
-            ;;
-        --basegen-allowed-branches)
-            BASEGEN_ALLOWED_BRANCHES="${2}"
             shift
             ;;
         --oe-env)
@@ -86,6 +81,75 @@ fi
 
 TOP=$(pwd)
 SSTATE="${HOME}/sstate-cache-$GEN"
+
+# make sure any old config has been migrated
+if [ -n "$BASEGEN_ALLOWED_BRANCHES" ]; then
+    die "BASEGEN_ALLOWED_BRANCHES has been replaced with 'permissions' file in sstate"
+fi
+
+# check we have permission to contribute to this sstate
+if [ -r "${SSTATE}/permissions" ]; then
+    # permissions provided: repo MUST match one line
+    while true; do
+        while IFS='|' read repo branches tagpatterns _futurestuff; do
+            if [ -n "$futurestuff" ]; then
+                die "this script only knows 'repo|branches|tagpatterns', cannot parse '$_futurestuff'"
+            fi
+
+            if [ "$repo" != "${CI_PROJECT_URL}" ]; then
+                # line does not describe this repo
+                continue
+            fi
+
+            # here repo has been found
+
+            if [ -n "${CI_COMMIT_TAG}" ]; then
+                if [ -z "$tagpatterns" ]; then
+                    # no pattern: all tags accepted
+                    break 2
+                fi
+                # "for tagpattern in $tagpatterns" while protecting from glob expansion
+                tmpfile=$(mktemp)
+                echo "$tagpatterns " | tr ' ' '\n' > "$tmpfile"
+                while < "$tmpfile" read tagpattern; do
+                    case "${CI_COMMIT_TAG}" in
+                        $tagpattern)
+                            # tag matched
+                            rm "$tmpfile"
+                            break 3 ;;
+                    esac
+                done
+                rm "$tmpfile"
+                die "REPO='${CI_PROJECT_URL}' is authorized by \"permissions\" file, but tag '${CI_COMMIT_TAG}' does not match any pattern in '${tagpatterns}'"
+
+            elif [ -n "${CI_COMMIT_BRANCH}" ]; then
+                if [ -z "$branches" ]; then
+                    # empty list: all branches accepted
+                    break 2
+                fi
+                for branch in $branches; do
+                    if [ $branch = "${CI_COMMIT_BRANCH}" ]; then
+                        # branch matched
+                        break 3
+                    fi
+                done
+                die "REPO='${CI_PROJECT_URL}' is authorized by \"permissions\" file, but BRANCH='${CI_COMMIT_BRANCH}' does not match any in '$branches'"
+
+            else
+                die "REPO='${CI_PROJECT_URL}' is authorized by \"permissions\" file, but '${CI_COMMIT_REF_NAME}' is not an authorized branch or tag"
+            fi
+            # not reached
+            die "internal error, reached unreachable statement at line $LINENO"
+        done < "${SSTATE}/permissions"
+
+        # repo was not found
+        die "sstate managed by \"permissions\" file, but REPO='${CI_PROJECT_URL}' is not authorized there"
+
+    done
+    # break's bring us here: permission granted
+    echo "permission granted to contribute to shared-state"
+fi
+
 SSTATE_MIRRORS=""
 
 case "$GEN" in
@@ -102,13 +166,6 @@ case "$GEN" in
                     ;;
             esac
         done
-        ;;
-    *)
-        if [ -n "$BASEGEN_ALLOWED_BRANCHES" ]; then
-            echo $BASEGEN_ALLOWED_BRANCHES | tr ' ' '\n' | grep -qxF "$CI_COMMIT_REF_NAME" ||
-                die "branch '$CI_COMMIT_REF_NAME' is NOT allowed to contribute to base sstate cache"
-            echo "NOTE: branch '$CI_COMMIT_REF_NAME' allowed to contribute to base sstate cache"
-        fi
         ;;
 esac
 

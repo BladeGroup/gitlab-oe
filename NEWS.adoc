@@ -1,5 +1,9 @@
 = Changes with possible impact on caller project
 
+* safeguard to avoid polution of sstate-cache does not use
+  BASEGEN_ALLOWED_BRANCHES any more (which offered very low protection),
+  but a "permissions" file in sstate-cache dir itself
+
 * `local.conf` can be more easily tuned for project-specific needs
   using new `ci-mkconf-hook.sh`
 

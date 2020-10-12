@@ -68,7 +68,7 @@ patches welcomed.
   `artifacts` in which your own scripts can add other files you want
   saved as artifacts
 - cleanup of copy-on-write shared-state currently has to be done
-  manually (annoying in combination with `BASEGEN_ALLOWED_BRANCHES`)
+  manually
 - buildhistory push is not robust about any change done concurently
   during the build (limits the single shell runner to one job at a
   time - but anyway there's no job control in place today to make
@@ -101,6 +101,36 @@ the build tree, suitable for appending project-specific variables to
 `poky/oe-init-build-env` (or a user-provided alternate env-setting
 script) and thus runs from within the build tree, and can use any of
 the local variables set in `mkconf`, including OE envvars.
+
+=== protection against shared-state polution
+
+A file named `permissions` can be created in the sstate-cache dir, to
+specify which repositories, branches, and tag patterns will be allowed
+to contribute to this particular shared-state.  It is expected to
+contain one line per allowed repository, with fields separated by a
+`|` character.
+
+Currently defined fields are:
+
+ <repo_url>|<branch_list>|<tag_pattern_list>
+
+`<branch_list>` is interpreted as a space-separated list of branch
+names.  `<tag_pattern_list>` is interpreted as a space-separated list
+shell glob patterns against which tags are checked.
+
+If `<branch_list>` or `<tag_pattern_list>` is not specified or empty,
+all branches (resp. all tags) are allowed.  If no line matches the
+repo to which the job belongs, or if the branch or tag does not match
+the declaration for this repo, the build is aborted.
+
+If the `permissions` file does not exist, no restriction is enforced.
+If it is empty, the rules described above imply no job can contribute
+to this shared-state any more.
+
+To avoid older settings from breaking, the build will also be aborted
+if a legacy `BASEGEN_ALLOWED_BRANCHES` variable is defined, to give
+the opportunity to migrate to `permissions` files, rather than just
+ignoring the requested safeguard (as low-tech as it was).
 
 === debugging
 
