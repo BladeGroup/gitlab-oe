@@ -73,6 +73,9 @@ patches welcomed.
   during the build (limits the single shell runner to one job at a
   time - but anyway there's no job control in place today to make
   running several of them concurently on the same runner)
+- buildhistory usage relies on external creation of new buildhistory
+  branches, effectively limiting the build to externally-defined branches,
+  which is a problem to run build jobs on tags
 
 planned evolutions:
 
