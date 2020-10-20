@@ -71,6 +71,13 @@ done
 [ -n "$DL_DIR" ] || die "missing --download-dir"
 [ -r "$OEENV" ] || die "cannot read '$OEENV', adjust with --oe-env"
 
+[ -d "poky/$TEMPLATECONF" ] || {
+    printf "PWD $(pwd)\nLS:\n"
+    ls
+    echo "/LS"
+    die "not found 'poky/$TEMPLATECONF'"
+}
+
 if [ -n "$HISTREPO" -a -z "$HISTREF" ]; then
     die "--buildhistory-repo requries --buildhistory-ref"
 fi
