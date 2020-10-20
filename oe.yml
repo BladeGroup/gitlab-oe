@@ -11,14 +11,15 @@
 # recommended global variables:
 # - BUILDHISTREPO: git buildhistory repository
 # - PRSERV: suitable value for PRSERV_HOST in local.conf
+# - TEMPLATECONF: standard yocto variable for build configuration templates
 # needs platform variables:
-# - BRANCHPREFIX_ARCH: for conf template directory and buildhistory branch prefix
+# - BRANCHPREFIX_ARCH: for buildhistory branch prefix
 # - UPDATE_ARCH: used to separate feeds for different architectures
 
 .oe_setup:
   before_script:
     - BASEBRANCHNAME="${CI_COMMIT_REF_NAME#${BRANCHPREFIX_ARCH}/}"
-    - ./ci/mkconf --dir "${B}" --sstate-gen "${BUILD_GEN}" --download-dir "${HOME}/downloads-${POKY_BASE}" --template-conf "$PWD/conf-${BRANCHPREFIX_ARCH}" --buildhistory-repo "$BUILDHISTREPO" --buildhistory-ref "${BRANCHPREFIX_ARCH}/$BASEBRANCHNAME" --prserv "$PRSERV" --oe-env "${POKY_ENVINIT}"
+    - ./ci/mkconf --dir "${B}" --sstate-gen "${BUILD_GEN}" --download-dir "${HOME}/downloads-${POKY_BASE}" --buildhistory-repo "$BUILDHISTREPO" --buildhistory-ref "${BRANCHPREFIX_ARCH}/$BASEBRANCHNAME" --prserv "$PRSERV" --oe-env "${POKY_ENVINIT}"
 
 .oe_deploy:
   after_script:

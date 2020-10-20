@@ -11,7 +11,6 @@ die() {
 : ${CI_COMMIT_SHA:=$(git rev-parse "${CI_COMMIT_REF_NAME}")}
 
 B=""
-TEMPLATECONF=""
 GEN=""
 DL_DIR=""
 HISTREPO=""
