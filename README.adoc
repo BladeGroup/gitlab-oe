@@ -36,7 +36,8 @@ This includes:
   git submodule or subtree)
 - yocto project's Poky repository is available in your project repo as
   `/poky`
-- all other layers are available after checkout
+- all other layers are available under your project repo after `git checkout`
+  and `submodule update --init`
 - if specified, `$BUILDHISTREPO` must be writable from your gitlab-ci user
 - you have set up a PR server, accessible from your runner (which
   assumes both are located inside of a trusted network)
