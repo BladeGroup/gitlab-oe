@@ -66,17 +66,20 @@ DEST="$1"
 
 SSTATE="${REPO}/sstate-cache-${GEN}"
 
-case "$GEN" in
-    *+*)
-        BASEGEN=${GEN%+*}
-        BASESSTATE="${REPO}/sstate-cache-${BASEGEN}"
-        SSTATES="$BASESSTATE $SSTATE"
-        ;;
-    *)
-        SSTATES="$SSTATE"
-        ;;
-esac
-
+BASEGEN=${GEN}
+SSTATES="$SSTATE"
+while true; do
+    case "$BASEGEN" in
+        *+*)
+            BASEGEN=${BASEGEN%+*}
+            BASESSTATE="${REPO}/sstate-cache-${BASEGEN}"
+            SSTATES="$BASESSTATE $SSTATES"
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
 
 rsync --rsh "ssh -p 1023" -aHv \
       "${EXTRAFLAGS[@]}" \
