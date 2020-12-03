@@ -40,6 +40,9 @@ done
 [ -n "$GEN" ] || die "missing --sstate-gen"
 [ -n "$DST" ] || die "missing --rsync-to"
 
+# gitlab does not allow to set empty variables
+PORT=$(echo $PORT | tr -d ' ')
+
 if [ -n "$PORT" ]; then
     export RSYNC_RSH="ssh -p '$PORT'"
 fi

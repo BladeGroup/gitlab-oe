@@ -57,6 +57,9 @@ done
 [ -n "$DST" ] || die "missing --rsync-to"
 [ -n "$FEED" ] || die "missing --feed"
 
+# gitlab does not allow to set empty variables
+PORT=$(echo $PORT | tr -d ' ')
+
 if [ -n "$PORT" ]; then
     export RSYNC_RSH="ssh -p '$PORT'"
 fi

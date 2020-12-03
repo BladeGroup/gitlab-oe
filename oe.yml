@@ -22,6 +22,17 @@
 
 .oe_deploy:
   after_script:
+    - if [ -n "$OECICONF" ]; then
+    -   echo "NOTE:using variable prefix '$OECICONF'"
+    -   eval _tmp=\${${OECICONF}RSYNC_REPO_SRV}
+    -   if [ -n "$_tmp" ]; then export RSYNC_REPO_SRV="$_tmp"; fi
+    -   eval _tmp=\${${OECICONF}RSYNC_REPO_PORT}
+    -   if [ -n "$_tmp" ]; then export RSYNC_REPO_PORT="$_tmp"; fi
+    -   eval _tmp=\${${OECICONF}RSYNC_SSTATE_SRV}
+    -   if [ -n "$_tmp" ]; then export RSYNC_SSTATE_SRV="$_tmp"; fi
+    -   eval _tmp=\${${OECICONF}RSYNC_SSTATE_PORT}
+    -   if [ -n "$_tmp" ]; then export RSYNC_SSTATE_PORT="$_tmp"; fi
+    - fi
     - BASEBRANCHNAME="${CI_COMMIT_REF_NAME#${BRANCHPREFIX_ARCH}/}"
     - ./ci/feed-publish --dir "${B}" --arch "${UPDATE_ARCH}" --feed "$BASEBRANCHNAME" --rsync-to "${RSYNC_REPO_SRV}" --ssh-port "${RSYNC_REPO_PORT}"
     - ./ci/sstate-publish --sstate-gen "${BUILD_GEN}" --rsync-to "${RSYNC_SSTATE_SRV}" --ssh-port "${RSYNC_SSTATE_PORT}"
