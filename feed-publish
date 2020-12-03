@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+set -x
 
 : ${RSYNC:=rsync -a --info=stats2}
 : ${RSYNCDELETE:=--delete-after}
