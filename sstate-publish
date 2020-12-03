@@ -1,6 +1,11 @@
 #!/bin/sh
 set -e
 
+# The "-H" is only for compatibility with the old way of doing CoW
+# The "--safe-links" is there for to prevent sync'ing symlinks created by
+# bitbake, pointing to local SSTATE_MIRRORS
+: ${RSYNC:=rsync -a --info=stats2 -H --safe-links}
+
 die() {
     echo >&2 "ERROR: $*"
     exit 1
@@ -41,7 +46,7 @@ done
 [ -n "$DST" ] || die "missing --rsync-to"
 
 # gitlab does not allow to set empty variables
-PORT=$(echo $PORT | tr -d ' ')
+PORT=$(echo $PORT)
 
 if [ -n "$PORT" ]; then
     export RSYNC_RSH="ssh -p '$PORT'"
@@ -49,6 +54,6 @@ fi
 
 SSTATE=~/sstate-cache-"${GEN}"
 
-rsync -aH --info=stats2 --safe-links "$@" \
+$RSYNC "$@" \
       $SSTATE \
       "$DST"

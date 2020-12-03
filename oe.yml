@@ -24,6 +24,10 @@
   after_script:
     - if [ -n "$OECICONF" ]; then
     -   echo "NOTE:using variable prefix '$OECICONF'"
+    -   eval _tmp=\${${OECICONF}RSYNC}
+    -   if [ -n "$_tmp" ]; then export RSYNC="$_tmp"; fi
+    -   eval _tmp=\${${OECICONF}RSYNCDELETE}
+    -   if [ -n "$_tmp" ]; then export RSYNCDELETE="$_tmp"; fi
     -   eval _tmp=\${${OECICONF}RSYNC_REPO_SRV}
     -   if [ -n "$_tmp" ]; then export RSYNC_REPO_SRV="$_tmp"; fi
     -   eval _tmp=\${${OECICONF}RSYNC_REPO_PORT}

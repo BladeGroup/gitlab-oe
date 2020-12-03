@@ -1,5 +1,8 @@
 = Changes with possible impact on caller project
 
+* environement variable RSYNC can now be used to specify a different
+  rsync program (eg. "gsutil rsync")
+
 * safeguard to avoid polution of sstate-cache does not use
   BASEGEN_ALLOWED_BRANCHES any more (which offered very low protection),
   but a "permissions" file in sstate-cache dir itself

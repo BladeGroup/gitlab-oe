@@ -10,7 +10,7 @@ This includes:
 - publication of package feeds
 - publication of shared-state for reuse by developpers
 - offload of build artifacts through rsync servers, as gitlab does not
-  support large-enough artifacts
+  support large-enough artifacts, including Google Cloud Platform backend
 - support for platform-specific branches using a branch prefix
   (eg. `board1/master`)
 - persistence of downloads and shared-state directories
@@ -210,6 +210,10 @@ emulate being running by gitlab-ci from your current branch.
       - ./ci/run-bitbake --dir ${B} -- ${IMGROOT} -c populate_sdk
       - tar -C $B/tmp/deploy/sdk/ -cvf - . --xform=s,^.,${YOCTO_ARCH}/${BASEBRANCHNAME}, | ssh -p ${SSH_SDK_PORT} ${SSH_SDK_SRV} tar -C ${SSH_SDK_DIR} -xf -
 
+
+== setting up where to publish shared-state and feed
+
+TBW
 
 == using the server's shared-state
 

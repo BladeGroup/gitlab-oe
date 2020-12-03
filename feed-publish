@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+: ${RSYNC:=rsync -a --info=stats2}
+: ${RSYNCDELETE:=--delete-after}
+
 die() {
     echo >&2 "ERROR: $*"
     exit 1
@@ -58,11 +61,20 @@ done
 [ -n "$FEED" ] || die "missing --feed"
 
 # gitlab does not allow to set empty variables
-PORT=$(echo $PORT | tr -d ' ')
+PORT=$(echo $PORT)
 
 if [ -n "$PORT" ]; then
     export RSYNC_RSH="ssh -p '$PORT'"
 fi
 
-rsync -a --info=stats2 \
-      --delete-after "${B}/tmp/deploy/${PKGTYPE}/" "${DST}/${ARCH}/${FEED}"
+# some rsync implementations (gsutil) do not support --delete-after so
+# we have to get back to 19th-century techniques: work in 2 passes
+
+if [ "$RSYNCDELETE" != "--delete-after" ]; then
+    $RSYNC \
+        "${B}/tmp/deploy/${PKGTYPE}/" "${DST}/${ARCH}/${FEED}"
+fi
+
+$RSYNC \
+    ${RSYNCDELETE} \
+    "${B}/tmp/deploy/${PKGTYPE}/" "${DST}/${ARCH}/${FEED}"
