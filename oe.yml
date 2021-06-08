@@ -17,6 +17,7 @@
 
 .oe_setup:
   before_script:
+    - 'test -z "$(git diff-index --name-only HEAD --)" || { echo >&2 "ERROR: local modifications after checkout, probably hit gitlab-runner bug - rerun the job, see https://gitlab.com/gitlab-org/gitlab-runner/-/issues/26993"; exit 1; }'
     - BASEBRANCHNAME="${CI_COMMIT_REF_NAME#${BRANCHPREFIX_ARCH}/}"
     - ./ci/mkconf --dir "${B}" --sstate-gen "${BUILD_GEN}" --download-dir "${HOME}/downloads-${POKY_BASE}" --template-conf "$PWD/conf-${BRANCHPREFIX_ARCH}" --buildhistory-repo "$BUILDHISTREPO" --buildhistory-ref "${BRANCHPREFIX_ARCH}/$BASEBRANCHNAME" --prserv "$PRSERV" --oe-env "${POKY_ENVINIT}"
 
