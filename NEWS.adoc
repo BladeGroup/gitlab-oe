@@ -1,5 +1,8 @@
 = Changes with possible impact on caller project
 
+* run-bitbake now fails if it the "poor man's afterscript" code (which
+  notably attemps to push buildhistory) fails
+
 * safeguard to avoid polution of sstate-cache does not use
   BASEGEN_ALLOWED_BRANCHES any more (which offered very low protection),
   but a "permissions" file in sstate-cache dir itself

@@ -33,6 +33,7 @@ set +e
 # now get the job's exit code and make sure we exit with it
 ./ci/run --dir "$B" bitbake "$@"
 BB_RET=$?
+set -e
 
 # BEGIN poor man's after_script, can't use that gitlab-ci feature as
 # it is already filled by oe_deploy
